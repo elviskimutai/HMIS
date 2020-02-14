@@ -11,7 +11,7 @@ import Companies from "./SystemAdmin/Companies";
 import BranchAccess from "./SystemAdmin/BranchAccess";
 import Audittrails from "./SystemAdmin/Audittrails";
 import Profile from "./SystemAdmin/Profile";
-
+import Logout from "./SystemAdmin/Logout";
 // Patient management
 import Patient from "./PatientManagement/Patient"
 
@@ -22,6 +22,9 @@ import ItemCategories from "./SetUps/ItemCategories"
 import Suppliers from "./SetUps/Suppliers"
 import Items from "./SetUps/Items"
 
+//Inventory
+import Requisitions from "./Inventory/Requisitions"
+import RequisitionsApproval from "./Inventory/RequisitionsApproval"
 
 function App() {
   let token = localStorage.getItem("xtoken");
@@ -45,7 +48,11 @@ function App() {
               <Route path="/PaymentModes" exact component={PaymentModes} />
               <Route path="/ItemCategories" exact component={ItemCategories} />
               <Route path="/Suppliers" exact component={Suppliers} />
-              <Route path="/Items" exact component={Items} />              
+              <Route path="/Items" exact component={Items} />    
+              <Route path="/Requisitions" exact component={Requisitions} />    
+              <Route path="/RequisitionsApproval" exact component={RequisitionsApproval} />    
+              <Route path="/Logout" exact component={Logout} />    
+              
             </Switch>
           </Header>
         </HashRouter>
@@ -57,6 +64,7 @@ function App() {
         <HashRouter>
           <Switch>
             <Route path="/" exact component={Login} />
+            <Route path="/Logout" exact component={Logout} />   
           </Switch>
         </HashRouter>
       </div>

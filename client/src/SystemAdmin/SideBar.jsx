@@ -9,6 +9,7 @@ class SideBar extends Component {
       showMenuAdmin: true,
       showMenuPatientmanagement: false,
       showMenuConfigurations:false,
+      showMenuInventory:false,
       privilages: [],
       Logo: ""
     };
@@ -19,11 +20,13 @@ class SideBar extends Component {
       this.setState({
         showMenuAdmin: !this.state.showMenuAdmin,
         showMenuConfigurations: false,
+        showMenuInventory: false,
         showMenuPatientmanagement: false
       });
     } else if (Module === "Patient Management") {
       this.setState({
         showMenuAdmin: false,
+        showMenuInventory: false,
         showMenuConfigurations: false,
         showMenuPatientmanagement: !this.state.showMenuPatientmanagement
       });
@@ -32,9 +35,19 @@ class SideBar extends Component {
       this.setState({
         showMenuAdmin: false,
         showMenuPatientmanagement: false,
+        showMenuInventory: false,
         showMenuConfigurations: !this.state.showMenuConfigurations
       });
     }
+    else if (Module === "Inventory Management") {
+      this.setState({
+        showMenuInventory:!this.state.showMenuInventory,
+        showMenuAdmin: false,
+        showMenuPatientmanagement: false,
+        showMenuConfigurations: false
+      });
+    }
+    
   };
   fetchUserPrivilages() {
     fetch("/api/UserAccess", {
@@ -175,6 +188,12 @@ class SideBar extends Component {
               validaterole={this.validaterole}
               showMenu={this.showMenu}
               showmenuvalue={this.state.showMenuConfigurations}
+              MenuStyle={MenuStyle}
+            />
+            <Inventory
+              validaterole={this.validaterole}
+              showMenu={this.showMenu}
+              showmenuvalue={this.state.showMenuInventory}
               MenuStyle={MenuStyle}
             />
             
@@ -343,6 +362,45 @@ const SetUpsmanagement = props => {
                 <Link to="/Items">
                   <i className="fa fa-user-plus " />
                   Items
+                </Link>
+              </li>
+            ) : null}
+        
+          </ul>
+        ) : null}
+      </li>
+    );
+  } else {
+    return <div />;
+  }
+};
+const Inventory = props => {
+  if (props.validaterole("Inventory Management", "View")) {
+    return (
+      <li>
+        <li
+          className=""
+          onClick={e => props.showMenu("Inventory Management", e)}
+          style={props.MenuStyle}
+        >
+          <i className="fa fa-cogs" />{" "}
+          <span className="nav-label">Inventory</span>
+        </li>
+        {props.showmenuvalue ? (
+          <ul className="nav nav-second-level">
+            {props.validaterole("Purchase Requisition", "View") ? (
+              <li>
+                <Link to="/Requisitions">
+                  <i className="fa fa-user-plus " />
+                  Purchase Requisition
+                </Link>
+              </li>
+            ) : null}
+                  {props.validaterole("Requisition Approval", "View") ? (
+              <li>
+                <Link to="/RequisitionsApproval">
+                  <i className="fa fa-user-plus " />
+                   Requisition Approval
                 </Link>
               </li>
             ) : null}

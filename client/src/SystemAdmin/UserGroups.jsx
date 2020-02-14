@@ -23,6 +23,7 @@ class UserGroups extends Component {
       CaseManagementCategory: [],
       ReportsCategory: [],
       ConfigurationsCategory:[],
+      InventoryCategory:[],
     };
 
     this.openModal = this.openModal.bind(this);
@@ -95,6 +96,7 @@ class UserGroups extends Component {
       Menus: [],
       ReportsCategory: [],
       Patient_ManagementCategory:[],
+      InventoryCategory:[],
       ConfigurationsCategory:[],});
     this.fetchRoles(K.UserGroupID);
   };
@@ -117,6 +119,7 @@ class UserGroups extends Component {
           this.setState({ AdminCategory: UserRoles[0].Admin ,
           Patient_ManagementCategory: UserRoles[0].PatientManagement,         
           Menus: UserRoles[0].Menus ,
+          InventoryCategory: UserRoles[0].Inventory ,
           ConfigurationsCategory: UserRoles[0].Configurations });
         } else {
           swal("", Roles.message, "error");
@@ -171,10 +174,12 @@ class UserGroups extends Component {
     this.Resetsate();
   }
 
-  closeRolesPoup() {
+  closeRolesPoup=(event)=> {
+    event.preventDefault();
     this.setState({ RolesPoup: false });
   }
-  closeRolesPoup1 = () => {
+  closeRolesPoup1 = (event) => {
+    event.preventDefault();
     this.setState({ RolesPoup: false });
     swal("", "Roles Saved", "success");
   };
@@ -691,7 +696,71 @@ class UserGroups extends Component {
                         {" "}
                         Configurations 
                       </h5>
+                      
                       {this.state.ConfigurationsCategory.map((role, i)=> {
+                        return (
+                          <tr id={i}>
+                            <td>{role.RoleName}</td>
+                            <td>
+                              <input
+                                className="checkbox"
+                                id={i}
+                                type="checkbox"
+                                name="Create"
+                                defaultChecked={role.AddNew}
+                                onChange={e => handleCheckBoxChange(role, e)}
+                                // onChange={handleCheckBoxChange(e)}
+                              />
+                            </td>
+                            <td>
+                              <input
+                                className="checkbox"
+                                id={i + 1}
+                                type="checkbox"
+                                name="View"
+                                defaultChecked={role.View}
+                                //   value=""
+                                onChange={e => handleCheckBoxChange(role, e)}
+                              />
+                            </td>
+                            <td>
+                              <input
+                                className="checkbox"
+                                id={i + 2}
+                                type="checkbox"
+                                name="Delete"
+                                defaultChecked={role.Remove}
+                                onChange={e => handleCheckBoxChange(role, e)}
+                              />
+                            </td>
+                            <td>
+                              <input
+                                className="checkbox"
+                                id={i + 3}
+                                type="checkbox"
+                                name="Update"
+                                defaultChecked={role.Edit}
+                                onChange={e => handleCheckBoxChange(role, e)}
+                              />
+                            </td>
+                            <td>
+                              <input
+                                className="checkbox"
+                                id={i + 3}
+                                type="checkbox"
+                                name="Export"
+                                defaultChecked={role.Export}
+                                onChange={e => handleCheckBoxChange(role, e)}
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
+                        <h5 style={{ marginLeft: "10px" }} className="text-blue">
+                        {" "}
+                        Inventory Category
+                      </h5>
+                      {this.state.InventoryCategory.map((role, i)=> {
                         return (
                           <tr id={i}>
                             <td>{role.RoleName}</td>

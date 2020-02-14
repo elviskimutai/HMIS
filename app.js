@@ -26,6 +26,11 @@ var ItemCategories=require("./routes/Setups/ItemCategories")
 var Suppliers=require("./routes/Setups/Suppliers")
 var Items=require("./routes/Setups/Items")
 
+//Inventory
+var Requisitions=require("./routes/Inventory/Requisitions")
+var RequisitionsApproval=require("./routes/Inventory/RequisitionsApproval")
+ //PDF
+ var PO=require("./routes/generatepdf/po");
 var app = express();
 
 // view engine setup
@@ -42,6 +47,8 @@ app.use(express.static("uploads"));
 app.use("/api/login", auth.router);
 app.use("/api/ValidateTokenExpiry", ValidateTokenExpiry);
 app.use("/api/Uploads", Uploads);
+//PDF
+app.use("/api/PO",PO)
 
 app.use(auth.validateToken);
 app.use("/api/users", SystemUsers);
@@ -65,6 +72,12 @@ app.use("/api/PaymentModes", PaymentModes);
 app.use("/api/ItemCategories", ItemCategories);
 app.use("/api/Suppliers", Suppliers);
 app.use("/api/Items", Items);
+
+//Inventory
+app.use("/api/Requisitions",Requisitions)
+app.use("/api/RequisitionsApproval",RequisitionsApproval)
+
+
 
 // // catch 404 and forward to error handler
 // app.use(function(req, res, next) {
