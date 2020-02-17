@@ -404,6 +404,32 @@ const Inventory = props => {
                 </Link>
               </li>
             ) : null}
+              {props.validaterole("Inventory Receipt", "View") ? (
+              <li>
+                <Link to="/InventoryReceipt">
+                  <i className="fa fa-user-plus " />
+                  Receipt
+                </Link>
+              </li>
+            ) : null}
+             {props.validaterole("Inventory Adjustment", "View") ? (
+              <li>
+                <Link to="/InventoryAdjustment">
+                  <i className="fa fa-user-plus " />
+                   Adjustment
+                </Link>
+              </li>
+            ) : null}
+               {props.validaterole("Inventory Adjustment", "View") ? (
+              <li>
+                <Link to="/StockList">
+                  <i className="fa fa-user-plus " />
+                  StockList
+                </Link>
+              </li>
+            ) : null}
+            
+            
         
           </ul>
         ) : null}

@@ -29,6 +29,8 @@ var Items=require("./routes/Setups/Items")
 //Inventory
 var Requisitions=require("./routes/Inventory/Requisitions")
 var RequisitionsApproval=require("./routes/Inventory/RequisitionsApproval")
+var InventoryAdjustment=require("./routes/Inventory/InventoryAdjustment")
+
  //PDF
  var PO=require("./routes/generatepdf/po");
 var app = express();
@@ -76,6 +78,7 @@ app.use("/api/Items", Items);
 //Inventory
 app.use("/api/Requisitions",Requisitions)
 app.use("/api/RequisitionsApproval",RequisitionsApproval)
+app.use("/api/InventoryAdjustment",InventoryAdjustment)
 
 
 

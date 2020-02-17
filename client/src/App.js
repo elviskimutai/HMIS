@@ -25,6 +25,9 @@ import Items from "./SetUps/Items"
 //Inventory
 import Requisitions from "./Inventory/Requisitions"
 import RequisitionsApproval from "./Inventory/RequisitionsApproval"
+import InventoryReceipt from "./Inventory/InventoryReceipt"
+import InventoryAdjustment from "./Inventory/InventoryAdjustment"
+import StockList from "./Inventory/StockList"
 
 function App() {
   let token = localStorage.getItem("xtoken");
@@ -50,7 +53,10 @@ function App() {
               <Route path="/Suppliers" exact component={Suppliers} />
               <Route path="/Items" exact component={Items} />    
               <Route path="/Requisitions" exact component={Requisitions} />    
-              <Route path="/RequisitionsApproval" exact component={RequisitionsApproval} />    
+              <Route path="/RequisitionsApproval" exact component={RequisitionsApproval} />   
+              <Route path="/InventoryReceipt" exact component={InventoryReceipt} />   
+              <Route path="/InventoryAdjustment" exact component={InventoryAdjustment} />   
+              <Route path="/StockList" exact component={StockList} /> 
               <Route path="/Logout" exact component={Logout} />    
               
             </Switch>
