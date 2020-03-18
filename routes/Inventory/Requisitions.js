@@ -49,13 +49,21 @@ Requisitions.post("/", auth.validateRole("Purchase Requisition"), function(req, 
       Description: Joi.string() .required(),
       Quantity: Joi.number()
       .required(),
-      Sphere: Joi.string() .allow(null)
+      Spehere_R: Joi.string() .allow(null)
       .allow(""),
-      Cylinder: Joi.string() .allow(null)
+      Cylinder_R: Joi.string() .allow(null)
       .allow(""),
-      Axis: Joi.string() .allow(null)
+      Axis_R: Joi.string() .allow(null)
       .allow(""),
-      Add: Joi.string() .allow(null)
+      _Add_R: Joi.string() .allow(null)
+      .allow(""),
+      Spehere_L: Joi.string() .allow(null)
+      .allow(""),
+      Cylinder_L: Joi.string() .allow(null)
+      .allow(""),
+      Axis_L: Joi.string() .allow(null)
+      .allow(""),
+      _Add_L: Joi.string() .allow(null)
       .allow("")
   });
   
@@ -70,11 +78,14 @@ Requisitions.post("/", auth.validateRole("Purchase Requisition"), function(req, 
             req.body.Description,             
             req.body.Quantity,
             res.locals.user,  
-            req.body.Sphere,
-            req.body.Cylinder,
-            req.body.Axis,
-            req.body.Add
-
+            req.body.Spehere_R,
+            req.body.Cylinder_R,
+            req.body.Axis_R,
+            req.body._Add_R,
+            req.body.Spehere_L,
+            req.body.Cylinder_L,
+            req.body.Axis_L,
+            req.body._Add_L
           
         ];
         con.getConnection(function(err, connection) {
@@ -85,7 +96,7 @@ Requisitions.post("/", auth.validateRole("Purchase Requisition"), function(req, 
             });
           } // not connected!
           else {
-            let sp = "call SPSaveRequisition(?,?,?,?,?,?,?,?,?,?)";
+            let sp = "call SPSaveRequisition(?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
             connection.query(sp, data, function(error, results, fields) {
               if (error) {
                 res.json({

@@ -23,14 +23,49 @@ class Patient extends Component {
       Gender: "",    
       open: false,  
       isUpdate: false,
-
+      openView: false,
+      openCheckinModal:false,
+      PatientsAttendance:[],
+      Race:"",
+      ActionID:"",
+      NextOfKin:"",
+      NextOfkinRelationship:"",
+      EmergencyContact:"",
+      Ocupation:"",
+      ResidentialAddress:"",
+      RefferedBy:"",  
+      Patientactions: [],
+      Timestamp:Date().toLocaleString(),
+      Departments:[],
+      DepartmentID:"",
+      Officer:""
    
     };
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
     this.Resetsate = this.Resetsate.bind(this);
   }
-  
+  fetchPatientactions = () => {
+    fetch("/api/Patientactions/" + localStorage.getItem("CompanyID"), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": localStorage.getItem("xtoken")
+      }
+    })
+      .then(res => res.json())
+      .then(Patientactions => {
+        if (Patientactions.length > 0) {
+          this.setState({ Patientactions: Patientactions });
+        } else {
+          //swal("", "Patientactions.message", "error");
+          swal("", Patientactions.message, "error");
+        }
+      })
+      .catch(err => {
+        swal("", err.message, "error");
+      });
+  };
   ProtectRoute() {
     fetch("/api/UserAccess", {
       method: "GET",
@@ -118,26 +153,36 @@ class Patient extends Component {
       Names: "",
       Address: "",
       Email: "",
-   
-      Mobile: "",
-   
-      isUpdate: false,
-    
+      Race:"",
+      NextOfKin:"",
+      NextOfkinRelationship:"",
+      EmergencyContact:"",
+      Ocupation:"",
+      ResidentialAddress:"",
+      RefferedBy:"", 
+      Mobile: "",   
+      isUpdate: false,    
       DOB: "",
       Gender: ""
     };
     this.setState(data);
   }
-  openModal() {
-    this.setState({ open: true });
-    this.Resetsate();
+  openModal=()=> {
+    this.setState({ open: true, openView: false });
   }
 
- 
-  closeModal() {
+  openCheckinModal=()=> {
+    this.setState({ openCheckinModal: true,openView: false  });
+  }
+  closeCheckinModal=()=> {
+    this.setState({ openCheckinModal: false });
+  }
+  closeModal=()=> {
     this.setState({ open: false });
   }
-
+  closeViewModal=()=> {
+    this.setState({ openView: false });
+  }
   
   handleInputChange = event => {
     // event.preventDefault();
@@ -148,9 +193,11 @@ class Patient extends Component {
     this.setState({ [name]: value });
   };
   handleSelectChange = (UserGroup, actionMeta) => {
-    if (actionMeta.name === "UserGroup") {
-      this.setState({ UserGroupID: UserGroup.value });
-      this.setState({ [actionMeta.name]: UserGroup.label });
+    if (actionMeta.name === "DepartmentID") {
+      
+    let Officer =this.state.Departments.filter(dep=>dep.DepartmentID==UserGroup.value)[0].UserName;
+        
+      this.setState({ Officer: Officer,[actionMeta.name]: UserGroup.value });
     } else {
       this.setState({ [actionMeta.name]: UserGroup.value });
     }
@@ -176,6 +223,47 @@ class Patient extends Component {
         swal("", err.message, "error");
       });
   };
+  fetchPatientsAttendance = (ID) => {
+    fetch("/api/PatientAttendance/"+ID+"/"+localStorage.getItem("BranchID")+"/" + localStorage.getItem("CompanyID"), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": localStorage.getItem("xtoken")
+      }
+    })
+      .then(res => res.json())
+      .then(PatientsAttendance => {
+        
+        if (PatientsAttendance.length > 0) {
+          this.setState({ PatientsAttendance: PatientsAttendance });
+        } else {
+          swal("", PatientsAttendance.message, "error");
+        }
+      })
+      .catch(err => {
+        swal("", err.message, "error");
+      });
+  };
+  fetchDepartments = () => {
+    fetch("/api/Departments/" + localStorage.getItem("CompanyID")+"/"+localStorage.getItem("BranchID")+"/Logins", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": localStorage.getItem("xtoken")
+      }
+    })
+      .then(res => res.json())
+      .then(Departments => {
+        if (Departments.length > 0) {
+          this.setState({ Departments: Departments });
+        } else {
+          swal("", Departments.message, "error");
+        }
+      })
+      .catch(err => {
+        swal("", err.message, "error");
+      });
+  };
   componentDidMount() {
     let token = localStorage.getItem("xtoken");
     if (token == null) {
@@ -194,6 +282,8 @@ class Patient extends Component {
             if (data.success) {
               this.ProtectRoute();
               this.fetchPatients();
+              this.fetchDepartments();
+              this.fetchPatientactions();
             } else {
               localStorage.clear();
               return (window.location = "/#/Logout");
@@ -218,32 +308,91 @@ class Patient extends Component {
       Email: this.state.Email,
       MobileNo: this.state.Mobile,
       DOB: this.state.DOB,
-      Gender: this.state.Gender
+      Gender: this.state.Gender,
+
+      Race:this.state.Race,
+      NextOfKin:this.state.NextOfKin,
+      NextOfkinRelationship:this.state.NextOfkinRelationship,
+      EmergencyContact:this.state.EmergencyContact,
+      Ocupation:this.state.Ocupation,
+      ResidentialAddress:this.state.ResidentialAddress,
+      RefferedBy:this.state.RefferedBy 
     };
 
     if (this.state.isUpdate) {
-      this.UpdateData("/api/Patient/" + this.state.Address, data);
+      this.UpdateData("/api/Patient/" + this.state.ID, data);
     } else {
       this.postData("/api/Patient", data);
     }
   };
   handleEdit = Users => {
+    
     const data = {
       Names: Users.Names,
+      ID: Users.ID,
       Address: Users.Address,
       Email: Users.Email,
       Address: Users.Address,
        DOB: dateFormat(new Date(Users.DOB).toLocaleDateString(), "isoDate"),
       Gender: Users.Gender,
       Mobile: Users.Mobile,
-      open: true,
+      BranchRegistered: Users.BranchRegistered,
+      CreatedAt: dateFormat(new Date(Users.CreatedAt).toLocaleDateString(), "isoDate"),
+      CreatedBy: Users.CreatedBy,
+      Race:Users.Race,
+      NextOfKin:Users.NextOfKin,
+      NextOfkinRelationship:Users.NextOfkinRelationship,
+      EmergencyContact:Users.EmergencyContact,
+      Ocupation:Users.Ocupation,
+      ResidentialAddress:Users.ResidentialAddress,
+      RefferedBy:Users.RefferedBy,
+      openView: true,
       isUpdate: true
     };
 
     this.setState(data);
-
-    // this.handleRolesOpoup(Users.Address);
+this.fetchPatientsAttendance(Users.ID)
+   
   };
+  CheckInPatient=event=> {
+    event.preventDefault();
+    let ComapnyID = localStorage.getItem("CompanyID");
+    let BranchID = localStorage.getItem("BranchID");
+    const data = {
+      BranchID: BranchID,
+      ComapnyID: ComapnyID,
+      PatientID: this.state.ID,
+      ActionID:this.state.ActionID,
+      DepartmentID:this.state.DepartmentID,
+      Officer:this.state.Officer,
+      
+      
+    };
+    fetch("/api/PatientAttendance", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": localStorage.getItem("xtoken")
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response =>
+        response.json().then(data => {
+          if (data.success) {
+          
+            swal("", "Record has been saved!", "success");
+            this.fetchPatientsAttendance(this.state.ID)
+          } else {
+            
+              swal("", data.message, "error");
+          
+          }
+        })
+      )
+      .catch(err => {
+        swal("", err.message, "error");
+      });
+  }
   handleDelete = k => {
     swal({
       text: "Are you sure that you want to delete this record?",
@@ -393,7 +542,7 @@ class Patient extends Component {
                   style={{ color: "#007bff" }}
                   onClick={e => this.handleEdit(k, e)}
                 >
-                  Edit |
+                  View |
                 </a>
               ) : (
                 <i>-</i>
@@ -403,7 +552,7 @@ class Patient extends Component {
                 <a
                   className="text-red"
                   style={{ color: "#f44542" }}
-                  onClick={e => this.handleDelete(k.Address, e)}
+                  onClick={e => this.handleDelete(k.ID, e)}
                 >
                   Delete
                 </a>
@@ -427,8 +576,19 @@ class Patient extends Component {
         label: "Female"
       }
     ];
-
-   
+    const PatientactionsOptions = [...this.state.Patientactions].map((k, i) => {
+      return {
+        value: k.ID,
+        label: k.Name
+      };
+    }); 
+    const DepartmentsonsOptions = [...this.state.Departments].map((k, i) => {
+      return {
+        value: k.DepartmentID,
+        label: k.Department+" ("+k.FullNames+")"
+      };
+    });
+    
 
     return (
       <div>
@@ -455,7 +615,242 @@ class Patient extends Component {
               </div>
             </div>
           </div>
+          <Modal
+            visible={this.state.openCheckinModal}
+            width="60%"
+            height="270px"
+            effect="fadeInUp"
+          >
+            <div style={{ "overflow-y": "scroll", height: "270px" }}>
+              <a className="close" onClick={() => this.closeCheckinModal()}>
+                &times;
+              </a>
 
+              <div className="row">
+                <div className="col-sm-5"></div>
+                <div className="col-sm-4 fontWeight-bold text-blue">
+                  Patient Checkin
+                </div>
+              </div>
+              <div className="container-fluid">
+                <div className="col-sm-12">
+                  <div className="ibox-content">
+                    <form
+                      className="form-horizontal"
+                      onSubmit={this.CheckInPatient}
+                    >
+                      <div className=" row">
+                        <div className="col-sm">
+                          <div className="form-group">
+                            <label
+                              htmlFor="Datereceived"
+                              className="fontWeight-bold"
+                            >
+                              Time In
+                            </label>
+                            <input
+                              type="text"
+                              className="form-control"
+                              name="Names"
+                              id="Name"
+                              disabled
+                              onChange={this.handleInputChange}
+                              value={this.state.Timestamp}
+                            />
+                          </div>
+                          </div>
+                          <div className="col-sm">
+                          <div className="form-group">
+                          <label for="Address" className="fontWeight-bold">
+                            Action{" "}
+                          </label>
+                          <Select
+                            name="ActionID"
+                            // value={PatientactionsOptions.filter(
+                            //   option => option.label === this.state.Gender
+                            // )}
+                            onChange={this.handleSelectChange}
+                            options={PatientactionsOptions}
+                            required
+                          />
+                          </div>
+                        </div>
+                        
+                      </div>
+
+                 
+                      <div className="row">
+                        <div className="col-sm-6">
+                        <div className="form-group">
+                          <label for="Address" className="fontWeight-bold">
+                           Send To
+                          </label>
+                          <Select
+                            name="DepartmentID"
+                            // value={PatientactionsOptions.filter(
+                            //   option => option.label === this.state.Gender
+                            // )}
+                            onChange={this.handleSelectChange}
+                            options={DepartmentsonsOptions}
+                            required
+                          />
+                          </div>
+                        
+                        </div>
+                        <div className="col-sm-4"></div>
+                        <div className="col-sm-2">
+                          <br/>
+                          <button
+                            className="btn btn-primary float-right"
+                            type="submit"
+                          >
+                           Complete Checkin
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Modal>
+          <Modal
+            visible={this.state.openView}
+            width="60%"
+            height="530px"
+            effect="fadeInUp"
+          >
+            <div style={{ "overflow-y": "scroll", height: "530px" }}>
+              <a className="close" onClick={() => this.closeViewModal()}>
+                &times;
+              </a>
+              <div className="container-fluid">
+                <div className="col-sm-12">
+                  <br/>
+                  <div >
+                  <nav>
+                      <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+                          <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Patient Details</a>
+                          <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Checkin</a>
+                          </div>
+                  </nav>
+                  <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                         <table className="table table-sm">
+                            <tr>
+                            <td className="font-weight-bold"> Full Names:</td>
+                            <td>{this.state.Names}</td>
+                            </tr>
+                            <tr>
+                            <td className="font-weight-bold"> Gender:</td>
+                            <td>{this.state.Gender}</td>
+                            </tr>
+                            <tr>
+                            <td className="font-weight-bold"> Email:</td>
+                            <td>{this.state.Email}</td>
+                            </tr>
+                            <tr>
+                            <td className="font-weight-bold">Address:</td>
+                            <td>{this.state.Address}</td>
+                            </tr>
+                            <tr>
+                            <td className="font-weight-bold">Mobile:</td>
+                            <td>{this.state.Mobile}</td>
+                            </tr>
+                            <tr>
+                            <td className="font-weight-bold">DOB:</td>
+                            <td>{this.state.DOB}</td>
+                            </tr>
+                            <tr>
+                            <td className="font-weight-bold">Branch Registered:</td>
+                            <td>{this.state.BranchRegistered}</td>
+                            </tr>
+                            <tr>
+                            <td className="font-weight-bold">Registered On:</td>
+                            <td>{this.state.CreatedAt}</td>
+                            </tr>
+                            <tr>
+                            <td className="font-weight-bold">Registered By:</td>
+                            <td>{this.state.CreatedBy}</td>
+                            </tr>
+                            
+                            <tr>
+                            <td className="font-weight-bold">NextOfKin:</td>
+                            <td>{this.state.NextOfKin}</td>
+                            </tr>  <tr>
+                            <td className="font-weight-bold">Next Of kin Relationship:</td>
+                            <td>{this.state.NextOfkinRelationship}</td>
+                            </tr>  <tr>
+                            <td className="font-weight-bold">Emergency Contact:</td>
+                            <td>{this.state.EmergencyContact}</td>
+                            </tr>  <tr>
+                            <td className="font-weight-bold">Ocupation:</td>
+                            <td>{this.state.Ocupation}</td>
+                            </tr>
+                            <tr>
+                            <td className="font-weight-bold">Race:</td>
+                            <td>{this.state.Race}</td>
+                            </tr>
+                            <tr>
+                            <td className="font-weight-bold">Reffered By:</td>
+                            <td>{this.state.RefferedBy}</td>
+                            </tr>
+                      </table>
+                        <div className="row">
+                      
+                          <div className="col-sm-2">
+                            <button
+                              className="btn btn-primary"
+                              type="button" onClick={this.openModal}
+                            >
+                              Edit
+                            </button>
+                          </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                              <br/>
+                               <div className="row">
+                                 <div className="col-sm-2">
+                                   <button className="btn btn-primary" onClick={this.openCheckinModal}>Check In</button>
+                                 </div>
+                               </div>
+                                <table class="table table-sm" cellspacing="0">
+                                    <thead>
+                                      
+                                        <tr>
+                                            <th>Branch</th>
+                                            <th>Names</th>                                            
+                                            <th>Checkin</th>
+                                            <th>Action</th>
+                                            
+                                            <th>Checked By</th>
+                                            
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {
+                                         this.state.PatientsAttendance.map((k, i) => {
+                                           return   <tr>
+                                           <td>{k.Branch}</td>
+                                           <td>{k.Names}</td>
+                                           <td>{k.CreatedAt}</td>
+                                           <td>{k.Action}</td>
+                                           <td>{k.CreatedBy}</td>
+                                       </tr>
+                                         })
+                                      }
+                                        
+                                       
+                                    </tbody>
+                                </table>
+                            </div>
+                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Modal>
           <Modal
             visible={this.state.open}
             width="60%"
@@ -589,10 +984,114 @@ class Patient extends Component {
                           />
                         </div>
                       </div>
-                     
+                      <div class="row">
+                        <div class="col-sm-6">
+                          <label for="Address" className="fontWeight-bold">
+                          Next Of Kin
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="NextOfKin"
+                            id="NextOfKin"
+                            required
+                            onChange={this.handleInputChange}
+                            value={this.state.NextOfKin}
+                          />
+                        </div>
+                        <div class="col-sm-6">
+                          <label for="Address" className="fontWeight-bold">
+                          Next Of kin Relationship
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="NextOfkinRelationship"
+                            id="NextOfkinRelationship"
+                            required
+                            onChange={this.handleInputChange}
+                            value={this.state.NextOfkinRelationship}
+                          />
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-6">
+                          <label for="Address" className="fontWeight-bold">
+                          EmergencyContact
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="EmergencyContact"
+                            id="EmergencyContact"
+                            required
+                            onChange={this.handleInputChange}
+                            value={this.state.EmergencyContact}
+                          />
+                        </div>
+                        <div class="col-sm-6">
+                          <label for="Address" className="fontWeight-bold">
+                          Ocupation
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="Ocupation"
+                            id="Ocupation"
+                            required
+                            onChange={this.handleInputChange}
+                            value={this.state.Ocupation}
+                          />
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-6">
+                          <label for="Address" className="fontWeight-bold">
+                          Residential Address
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="ResidentialAddress"
+                            id="ResidentialAddress"
+                            required
+                            onChange={this.handleInputChange}
+                            value={this.state.ResidentialAddress}
+                          />
+                        </div>
+                        <div class="col-sm-6">
+                          <label for="Address" className="fontWeight-bold">
+                          Race
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="Race"
+                            id="Race"
+                            
+                            onChange={this.handleInputChange}
+                            value={this.state.Race}
+                          />
+                        </div>
+                      </div>
                       <div className="row">
-                        <div className="col-sm-10"></div>
+                        <div className="col-sm-6">
+                        <label for="Address" className="fontWeight-bold">
+                        Reffered By
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            name="RefferedBy"
+                            id="RefferedBy"
+                            
+                            onChange={this.handleInputChange}
+                            value={this.state.RefferedBy}
+                          />
+                        </div>
+                        <div className="col-sm-4"></div>
                         <div className="col-sm-2">
+                          <br/>
                           <button
                             className="btn btn-primary float-right"
                             type="submit"

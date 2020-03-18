@@ -1,18 +1,18 @@
 import React, { Component } from "react";
 import swal from "sweetalert";
-import Table from "./Table";
-import TableWrapper from "./TableWrapper";
+import Table from "./../SystemAdmin/Table";
+import TableWrapper from "./../SystemAdmin/TableWrapper";
 import Modal from "react-awesome-modal";
 var _ = require("lodash");
-class Branches extends Component {
+class Patientactions extends Component {
   constructor() {
     super();
     this.state = {
-      Branches: [],
+      Patientactions: [],
       privilages: [],
       Name: "",
       Description: "",
-      BranchID: "",
+      ID: "",
       open: false,
       isUpdate: false
     };
@@ -97,14 +97,14 @@ class Branches extends Component {
     const data = {
       Name: "",
 
-      BranchID: "",
+      ID: "",
       isUpdate: false
     };
     this.setState(data);
   }
 
-  fetchBranches = () => {
-    fetch("/api/Branches/" + localStorage.getItem("CompanyID"), {
+  fetchPatientactions = () => {
+    fetch("/api/Patientactions/" + localStorage.getItem("CompanyID"), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -112,12 +112,12 @@ class Branches extends Component {
       }
     })
       .then(res => res.json())
-      .then(Branches => {
-        if (Branches.length > 0) {
-          this.setState({ Branches: Branches });
+      .then(Patientactions => {
+        if (Patientactions.length > 0) {
+          this.setState({ Patientactions: Patientactions });
         } else {
-          //swal("", "Branches.message", "error");
-          swal("", Branches.message, "error");
+          //swal("", "Patientactions.message", "error");
+          swal("", Patientactions.message, "error");
         }
       })
       .catch(err => {
@@ -140,7 +140,7 @@ class Branches extends Component {
         .then(response =>
           response.json().then(data => {
             if (data.success) {
-              this.fetchBranches();
+              this.fetchPatientactions();
               this.ProtectRoute();
             } else {
               localStorage.clear();
@@ -163,9 +163,9 @@ class Branches extends Component {
     };
 
     if (this.state.isUpdate) {
-      this.UpdateData("/api/Branches/" + this.state.BranchID, data);
+      this.UpdateData("/api/Patientactions/" + this.state.ID, data);
     } else {
-      this.postData("/api/Branches", data);
+      this.postData("/api/Patientactions", data);
     }
   };
   handleEdit = Name => {
@@ -173,7 +173,7 @@ class Branches extends Component {
       Name: Name.Name,
       open: true,
       isUpdate: true,
-      BranchID: Name.BranchID
+      ID: Name.ID
     };
 
     this.setState(data);
@@ -188,7 +188,7 @@ class Branches extends Component {
     }).then(willDelete => {
       if (willDelete) {
         return fetch(
-          "/api/Branches/" + k + "/" + localStorage.getItem("CompanyID"),
+          "/api/Patientactions/" + k + "/" + localStorage.getItem("CompanyID"),
           {
             method: "Delete",
             headers: {
@@ -205,7 +205,7 @@ class Branches extends Component {
               } else {
                 swal("", data.message, "error");
               }
-              this.fetchBranches();
+              this.fetchPatientactions();
             })
           )
           .catch(err => {
@@ -226,7 +226,7 @@ class Branches extends Component {
     })
       .then(response =>
         response.json().then(data => {
-          this.fetchBranches();
+          this.fetchPatientactions();
 
           if (data.success) {
             swal("", "Record has been updated!", "success");
@@ -252,7 +252,7 @@ class Branches extends Component {
     })
       .then(response =>
         response.json().then(data => {
-          this.fetchBranches();
+          this.fetchPatientactions();
 
           if (data.success) {
             swal("", "Record has been saved!", "success");
@@ -285,7 +285,7 @@ class Branches extends Component {
     ];
     let Rowdata1 = [];
 
-    const rows = [...this.state.Branches];
+    const rows = [...this.state.Patientactions];
 
     if (rows.length > 0) {
       rows.forEach(k => {
@@ -295,7 +295,7 @@ class Branches extends Component {
 
           action: (
             <span>
-              {this.validaterole("Branches", "Edit") ? (
+              {this.validaterole("Patient Actions", "Edit") ? (
                 <a
                   className="fa fa-edit"
                   style={{ color: "#007bff" }}
@@ -307,11 +307,11 @@ class Branches extends Component {
                 <i>-</i>
               )}
               &nbsp;
-              {this.validaterole("Branches", "Remove") ? (
+              {this.validaterole("Patient Actions", "Remove") ? (
                 <a
                   className="fa fa-trash"
                   style={{ color: "#f44542" }}
-                  onClick={e => this.handleDelete(k.BranchID, e)}
+                  onClick={e => this.handleDelete(k.ID, e)}
                 >
                   Delete
                 </a>
@@ -337,11 +337,11 @@ class Branches extends Component {
               <br />
               <div className="row">
                 <div className="col-sm-9">
-                  <h2>Branches</h2>
+                  <h2>Patient Actions</h2>
                 </div>
                 <div className="col-sm-3">
                   <span className="float-right">
-                    {this.validaterole("Branches", "AddNew") ? (
+                    {this.validaterole("Patient Actions", "AddNew") ? (
                       <button
                         type="button"
                         onClick={this.openModal}
@@ -351,7 +351,7 @@ class Branches extends Component {
                       </button>
                     ) : null}
                     &nbsp;
-                    {this.validaterole("Branches", "Export") ? (
+                    {this.validaterole("Patient Actions", "Export") ? (
                       <button
                         onClick={this.exportpdf}
                         type="button"
@@ -378,7 +378,7 @@ class Branches extends Component {
                 <div className="row">
                   <div className="col-sm-5"></div>
                   <div className="col-sm-4 font-weight-bold">
-                  Branches
+                  Actions
                   </div>
                 </div>
 
@@ -442,4 +442,4 @@ class Branches extends Component {
   }
 }
 
-export default Branches;
+export default Patientactions;

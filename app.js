@@ -18,13 +18,17 @@ var UpdateProfile=require("./routes/SystemAdmin/UpdateProfile");
 var ValidateTokenExpiry = require("./routes/SystemAdmin/ValidateTokenExpiry");
 //Patient management
 var Patient=require("./routes/PatientManagement/Patient")
-//SetUps
+var PatientAttendance=require("./routes/PatientManagement/PatientAttendance")
 
+//SetUps
 var Fees=require("./routes/Setups/Fees")
 var PaymentModes=require("./routes/Setups/PaymentModes")
 var ItemCategories=require("./routes/Setups/ItemCategories")
 var Suppliers=require("./routes/Setups/Suppliers")
 var Items=require("./routes/Setups/Items")
+var Patientactions=require("./routes/Setups/Patientactions")
+var Departments=require("./routes/Setups/Departments")
+var Departmentaccess=require("./routes/Setups/Departmentaccess")
 
 //Inventory
 var Requisitions=require("./routes/Inventory/Requisitions")
@@ -45,15 +49,18 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use(express.static("uploads"));
+app.use(express.static("uploads/Items"));
+app.use(express.static("uploads/Photos"));
+app.use(express.static("Reports/PO"));
 app.use("/api/login", auth.router);
 app.use("/api/ValidateTokenExpiry", ValidateTokenExpiry);
 app.use("/api/Uploads", Uploads);
 //PDF
 app.use("/api/PO",PO)
 
-app.use(auth.validateToken);
+
 app.use("/api/users", SystemUsers);
+app.use(auth.validateToken);
 app.use("/api/UserAccess", UserAccess);
 app.use("/api/SecurityGroups", UserGroups);
 app.use("/api/GroupAccess", GroupAccess);
@@ -66,6 +73,7 @@ app.use("/api/UpdateProfile", UpdateProfile);
 //Patient management
 
 app.use("/api/Patient", Patient);
+app.use("/api/PatientAttendance", PatientAttendance);
 
 //SetUps
 
@@ -74,6 +82,9 @@ app.use("/api/PaymentModes", PaymentModes);
 app.use("/api/ItemCategories", ItemCategories);
 app.use("/api/Suppliers", Suppliers);
 app.use("/api/Items", Items);
+app.use("/api/Patientactions", Patientactions);
+app.use("/api/Departments", Departments);
+app.use("/api/Departmentaccess", Departmentaccess);
 
 //Inventory
 app.use("/api/Requisitions",Requisitions)

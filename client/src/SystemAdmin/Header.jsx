@@ -7,6 +7,8 @@ class Header extends Component {
   constructor() {
     super();
     this.state = {
+      UserName:localStorage.getItem("UserName"),
+      BranchID:localStorage.getItem("BranchID"),
       ComapnyName: "",
       LoogedinCompay: ""
     };
@@ -60,13 +62,30 @@ class Header extends Component {
         // swal("Oops!", err.message, "error");
       });
   };
+  RegisterLogin( data = {}) {
+    fetch("/api/users/RegisterLogin/Logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": localStorage.getItem("xtoken")
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response =>
+        response.json().then(data => {
+        })
+      )
+      .catch(err => {
+       // swal("", err.message, "error");
+      });
+  }
   componentDidMount() {
     // this.fetchCompanyDetails();
     // this.fetchUsersCompanyDetails();
   }
   logout() {
+    this.RegisterLogin({BranchID:this.state.BranchID,UserName:this.state.UserName});
     localStorage.clear();
-
     return <Redirect to="/Login" push />;
   }
   render() {

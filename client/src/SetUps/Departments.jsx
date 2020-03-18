@@ -1,27 +1,29 @@
 import React, { Component } from "react";
+
 import swal from "sweetalert";
-import Table from "./Table";
-import TableWrapper from "./TableWrapper";
+import Table from "./../SystemAdmin/Table";
+import TableWrapper from "./../SystemAdmin/TableWrapper";
 import Modal from "react-awesome-modal";
+
 var _ = require("lodash");
-class Branches extends Component {
+class Departments extends Component {
   constructor() {
     super();
     this.state = {
-      Branches: [],
+      Departments: [],    
       privilages: [],
-      Name: "",
       Description: "",
-      BranchID: "",
-      open: false,
-      isUpdate: false
-    };
+     
+      open: false,  
+      isUpdate: false,
 
+   
+    };
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
     this.Resetsate = this.Resetsate.bind(this);
   }
-
+  
   ProtectRoute() {
     fetch("/api/UserAccess", {
       method: "GET",
@@ -81,30 +83,48 @@ class Branches extends Component {
     }
   };
 
-  openModal() {
-    this.setState({ open: true });
-    this.Resetsate();
-  }
 
-  closeModal() {
-    this.setState({ open: false });
-  }
-  handleInputChange = event => {
-    event.preventDefault();
-    this.setState({ [event.target.name]: event.target.value });
-  };
   Resetsate() {
     const data = {
-      Name: "",
-
-      BranchID: "",
-      isUpdate: false
+      Description: ""
+    
     };
     this.setState(data);
   }
+  openModal() {
+    const data = {
+      Description: "",
+      ID: "",
+      open: true,
+      isUpdate: false
+    };
 
-  fetchBranches = () => {
-    fetch("/api/Branches/" + localStorage.getItem("CompanyID"), {
+    this.setState(data);
+    this.Resetsate();
+  }
+
+ 
+  closeModal() {
+    this.setState({ open: false });
+  }
+
+  
+  handleInputChange = event => {
+    // event.preventDefault();
+    // this.setState({ [event.target.name]: event.target.value });
+    const target = event.target;
+    const value = target.type === "checkbox" ? target.checked : target.value;
+    const name = target.name;
+    this.setState({ [name]: value });
+  };
+  handleSelectChange = (UserGroup, actionMeta) => {
+ 
+      this.setState({ [actionMeta.name]: UserGroup.value });
+   
+  };
+  
+  fetchDepartmentss = () => {
+    fetch("/api/Departments/" + localStorage.getItem("CompanyID")+"/"+localStorage.getItem("BranchID"), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -112,12 +132,11 @@ class Branches extends Component {
       }
     })
       .then(res => res.json())
-      .then(Branches => {
-        if (Branches.length > 0) {
-          this.setState({ Branches: Branches });
+      .then(Departments => {
+        if (Departments.length > 0) {
+          this.setState({ Departments: Departments });
         } else {
-          //swal("", "Branches.message", "error");
-          swal("", Branches.message, "error");
+          swal("", Departments.message, "error");
         }
       })
       .catch(err => {
@@ -140,8 +159,8 @@ class Branches extends Component {
         .then(response =>
           response.json().then(data => {
             if (data.success) {
-              this.fetchBranches();
               this.ProtectRoute();
+              this.fetchDepartmentss();
             } else {
               localStorage.clear();
               return (window.location = "/#/Logout");
@@ -156,29 +175,33 @@ class Branches extends Component {
   }
   handleSubmit = event => {
     event.preventDefault();
-    let CompanyID = localStorage.getItem("CompanyID");
+    let ComapnyID = localStorage.getItem("CompanyID");
+    let BranchID = localStorage.getItem("BranchID");
     const data = {
-      CompanyID: CompanyID,
-      Name: this.state.Name
+      BranchID: BranchID,
+      ComapnyID: ComapnyID,
+      Description: this.state.Description
+     
     };
 
     if (this.state.isUpdate) {
-      this.UpdateData("/api/Branches/" + this.state.BranchID, data);
+      this.UpdateData("/api/Departments/" + this.state.ID, data);
     } else {
-      this.postData("/api/Branches", data);
+      this.postData("/api/Departments", data);
     }
   };
-  handleEdit = Name => {
+  handleEdit = Departments => {
     const data = {
-      Name: Name.Name,
+      Description: Departments.Name,
+      ID: Departments.ID,
       open: true,
-      isUpdate: true,
-      BranchID: Name.BranchID
+      isUpdate: true
     };
 
     this.setState(data);
-  };
 
+    // this.handleRolesOpoup(Departments.Amount);
+  };
   handleDelete = k => {
     swal({
       text: "Are you sure that you want to delete this record?",
@@ -188,7 +211,12 @@ class Branches extends Component {
     }).then(willDelete => {
       if (willDelete) {
         return fetch(
-          "/api/Branches/" + k + "/" + localStorage.getItem("CompanyID"),
+          "/api/Departments/" +
+            k +
+            "/" +
+            localStorage.getItem("CompanyID") +
+            "/" +
+            localStorage.getItem("BranchID"),
           {
             method: "Delete",
             headers: {
@@ -205,7 +233,7 @@ class Branches extends Component {
               } else {
                 swal("", data.message, "error");
               }
-              this.fetchBranches();
+              this.fetchDepartmentss();
             })
           )
           .catch(err => {
@@ -214,7 +242,7 @@ class Branches extends Component {
       }
     });
   };
-
+ 
   UpdateData(url = ``, data = {}) {
     fetch(url, {
       method: "PUT",
@@ -226,12 +254,11 @@ class Branches extends Component {
     })
       .then(response =>
         response.json().then(data => {
-          this.fetchBranches();
-
           if (data.success) {
             swal("", "Record has been updated!", "success");
-            this.setState({ open: false });
             this.Resetsate();
+            this.setState({ open: false });
+            this.fetchDepartmentss();
           } else {
             swal("", data.message, "error");
           }
@@ -252,14 +279,15 @@ class Branches extends Component {
     })
       .then(response =>
         response.json().then(data => {
-          this.fetchBranches();
-
           if (data.success) {
+          
             swal("", "Record has been saved!", "success");
-            this.setState({ open: false });
-            this.Resetsate();
+            //this.Resetsate();
+            this.fetchDepartmentss();
           } else {
-            swal("", data.message, "error");
+            
+              swal("", data.message, "error");
+          
           }
         })
       )
@@ -267,16 +295,17 @@ class Branches extends Component {
         swal("", err.message, "error");
       });
   }
+
   render() {
     const ColumnData = [
-     
       {
-        label: "Name",
-        field: "Name",
+        label: "Description",
+        field: "Description",
         sort: "asc",
         width: 200
       },
-      {
+      
+       {
         label: "action",
         field: "action",
         sort: "asc",
@@ -284,20 +313,22 @@ class Branches extends Component {
       }
     ];
     let Rowdata1 = [];
+    
+    const Rows = [...this.state.Departments];
 
-    const rows = [...this.state.Branches];
-
-    if (rows.length > 0) {
-      rows.forEach(k => {
-        const Rowdata = {
+    if (Rows.length > 0) {
+      Rows.map((k, i) => {
+        let Rowdata = {
+          Description: k.Name,
+              
          
-          Name: k.Name,
-
           action: (
             <span>
-              {this.validaterole("Branches", "Edit") ? (
+            
+              &nbsp;
+              {this.validaterole("Departments", "Edit") ? (
                 <a
-                  className="fa fa-edit"
+                  className="text-blue"
                   style={{ color: "#007bff" }}
                   onClick={e => this.handleEdit(k, e)}
                 >
@@ -307,11 +338,11 @@ class Branches extends Component {
                 <i>-</i>
               )}
               &nbsp;
-              {this.validaterole("Branches", "Remove") ? (
+              {this.validaterole("Departments", "Remove") ? (
                 <a
-                  className="fa fa-trash"
+                  className="text-red"
                   style={{ color: "#f44542" }}
-                  onClick={e => this.handleDelete(k.BranchID, e)}
+                  onClick={e => this.handleDelete(k.ID, e)}
                 >
                   Delete
                 </a>
@@ -324,115 +355,104 @@ class Branches extends Component {
         Rowdata1.push(Rowdata);
       });
     }
+  
+    
 
-    let tablestyle = {
-      width: "60%"
-    };
+   
 
     return (
       <div>
-        <div>
-          <div className="row wrapper border-bottom white-bg page-heading">
-            <div className="col-lg-12">
-              <br />
+        <div className="row wrapper border-bottom white-bg page-heading">
+          <div className="col-lg-12">
+            <br />
+            <div className="row">
+              <div className="col-sm-8">
+                <b>Departments</b>
+              </div>
+              <div className="col-sm-4">
+                <span className="float-right">
+                  {this.validaterole("Departments", "AddNew") ? (
+                    <button
+                      type="button"
+                      onClick={this.openModal}
+                      className="btn btn-primary fa fa-plus"
+                    >
+                      &nbsp;New
+                    </button>
+                  ) : null}
+               
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <Modal
+            visible={this.state.open}
+            width="60%"
+            height="200px"
+            effect="fadeInUp"
+          >
+            <div style={{ "overflow-y": "scroll", height: "200px" }}>
+              <a className="close" onClick={() => this.closeModal()}>
+                &times;
+              </a>
+
               <div className="row">
-                <div className="col-sm-9">
-                  <h2>Branches</h2>
+                <div className="col-sm-5"></div>
+                <div className="col-sm-4 fontWeight-bold text-blue">
+                Departments
                 </div>
-                <div className="col-sm-3">
-                  <span className="float-right">
-                    {this.validaterole("Branches", "AddNew") ? (
-                      <button
-                        type="button"
-                        onClick={this.openModal}
-                        className="btn btn-primary  fa fa-plus"
-                      >
-                        New
-                      </button>
-                    ) : null}
-                    &nbsp;
-                    {this.validaterole("Branches", "Export") ? (
-                      <button
-                        onClick={this.exportpdf}
-                        type="button"
-                        className="btn btn-primary  fa fa-file-pdf-o fa-2x"
-                      >
-                        &nbsp;PDF
-                      </button>
-                    ) : null}
-                    &nbsp;
-                  </span>
+              </div>
+              <div className="container-fluid">
+                <div className="col-sm-12">
+                  <div className="ibox-content">
+                    <form
+                      className="form-horizontal"
+                      onSubmit={this.handleSubmit}
+                    >
+                      <div className=" row">
+                        <div className="col-sm">
+                          <div className="form-group">
+                            <label
+                              htmlFor="Datereceived"
+                              className="fontWeight-bold"
+                            >
+                              Description
+                            </label>
+                            <input
+                              type="text"
+                              className="form-control"
+                              name="Description"
+                              id="Name"
+                              required
+                              onChange={this.handleInputChange}
+                              value={this.state.Description}
+                            />
+                          </div>
+                          </div>
+                      
+                        
+                      </div>
+
+                     
+                      <div className="row">
+                        <div className="col-sm-10"></div>
+                        <div className="col-sm-2">
+                          <button
+                            className="btn btn-primary float-right"
+                            type="submit"
+                          >
+                            Submit
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>
-            <Modal
-              visible={this.state.open}
-              width="65%"
-              height="250px"
-              effect="fadeInUp"
-            >
-              <div>
-                <a className="close text-red" onClick={this.closeModal}>
-                  &times;
-                </a>
-                <div className="row">
-                  <div className="col-sm-5"></div>
-                  <div className="col-sm-4 font-weight-bold">
-                  Branches
-                  </div>
-                </div>
-
-                <div>
-                  <div className="container-fluid">
-                    <div className="col-sm-12">
-                      <div className="ibox-content">
-                        <form onSubmit={this.handleSubmit}>
-                          <div className=" row">
-                            <div className="col-sm">
-                              <div className="form-group">
-                                <label
-                                  htmlFor="exampleInputEmail1"
-                                  className="font-weight-bold"
-                                >
-                                  Name
-                                </label>
-                                <input
-                                  type="text"
-                                  name="Name"
-                                  required
-                                  onChange={this.handleInputChange}
-                                  value={this.state.Name}
-                                  className="form-control"
-                                  id="exampleInputPassword1"
-                                  placeholder="Name"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-sm-12 ">
-                            <div className=" row">
-                              <div className="col-sm-2" />
-                              <div className="col-sm-8" />
-                              <div className="col-sm-1"></div>
-                              <div className="col-sm-1">
-                                <button
-                                  type="submit"
-                                  className="btn btn-primary float-left"
-                                >
-                                  Save
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Modal>
+          </Modal>
           </div>
-        </div>
 
         <TableWrapper>
           <Table Rows={Rowdata1} columns={ColumnData} />
@@ -441,5 +461,4 @@ class Branches extends Component {
     );
   }
 }
-
-export default Branches;
+export default Departments;

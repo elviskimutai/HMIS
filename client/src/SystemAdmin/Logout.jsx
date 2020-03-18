@@ -6,7 +6,10 @@ class Logout extends Component {
     this.state = {};
     this.logout = this.logout.bind(this);
   }
+
+ 
   logout = () => {
+  
     localStorage.clear();
     return <Redirect to="/Login" push />;
   };
@@ -14,6 +17,7 @@ class Logout extends Component {
     document.getElementById("nav-profile-tab").click();
   };
   componentDidMount() {
+    
     this.clicka();
   }
 

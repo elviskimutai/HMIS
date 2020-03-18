@@ -12,6 +12,7 @@ var config = require(".././SystemAdmin/DB");
 var con = mysql.createPool(config);
 
 PO.post("/", function(req, res) {
+  console.log(req.body)
   try {
     (async () => {
       try {

@@ -5,6 +5,8 @@ import { Route, Switch, HashRouter } from "react-router-dom";
 import SideBar from "./SystemAdmin/SideBar";
 import Header from "./SystemAdmin/Header";
 import Systemusers from "./SystemAdmin/Systemusers";
+import Dashboard from "./SystemAdmin/Dashboard";
+
 import UserGroups from "./SystemAdmin/UserGroups";
 import Branches from "./SystemAdmin/Branches";
 import Companies from "./SystemAdmin/Companies";
@@ -14,6 +16,7 @@ import Profile from "./SystemAdmin/Profile";
 import Logout from "./SystemAdmin/Logout";
 // Patient management
 import Patient from "./PatientManagement/Patient"
+import PatientAttendance from "./PatientManagement/PatientAttendance"
 
 //SetIps
 import Fees from "./SetUps/Fees"
@@ -21,6 +24,9 @@ import PaymentModes from "./SetUps/PaymentModes"
 import ItemCategories from "./SetUps/ItemCategories"
 import Suppliers from "./SetUps/Suppliers"
 import Items from "./SetUps/Items"
+import Patientactions from "./SetUps/Patientactions"
+import Departments from "./SetUps/Departments"
+import Departmentaccess from "./SetUps/Departmentaccess"
 
 //Inventory
 import Requisitions from "./Inventory/Requisitions"
@@ -39,6 +45,8 @@ function App() {
           <Header>
             <Switch>
               <Route path="/" exact component={Systemusers} />
+              <Route path="/Home" exact component={Dashboard} />
+              
               <Route path="/Systemusers" exact component={Systemusers} />
               <Route path="/SecurityGroups" exact component={UserGroups} />
               <Route path="/Branches" exact component={Branches} />
@@ -51,6 +59,11 @@ function App() {
               <Route path="/PaymentModes" exact component={PaymentModes} />
               <Route path="/ItemCategories" exact component={ItemCategories} />
               <Route path="/Suppliers" exact component={Suppliers} />
+              <Route path="/Patientactions" exact component={Patientactions} />
+              <Route path="/Departments" exact component={Departments} />
+              <Route path="/Departmentaccess" exact component={Departmentaccess} />
+              <Route path="/PatientAttendance" exact component={PatientAttendance} />
+              
               <Route path="/Items" exact component={Items} />    
               <Route path="/Requisitions" exact component={Requisitions} />    
               <Route path="/RequisitionsApproval" exact component={RequisitionsApproval} />   

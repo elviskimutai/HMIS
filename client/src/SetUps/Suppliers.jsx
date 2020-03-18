@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-
 import swal from "sweetalert";
 import Table from "./../SystemAdmin/Table";
 import TableWrapper from "./../SystemAdmin/TableWrapper";
@@ -12,8 +11,7 @@ class Suppliers extends Component {
   constructor() {
     super();
     this.state = {
-      Suppliers: [],
-     
+      Suppliers: [],     
       privilages: [],
       Name: "",
       Telephone: "",
@@ -30,8 +28,7 @@ class Suppliers extends Component {
     };
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
-    this.Resetsate = this.Resetsate.bind(this);
-   
+    this.Resetsate = this.Resetsate.bind(this);   
   }
   
   ProtectRoute() {

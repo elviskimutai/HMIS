@@ -13,12 +13,15 @@ class RequisitionsApproval extends Component {
       privilages: [],
       Items:[],
       Suppliers:[],
+      Company:[],
       SupplierID:"",
-      ReqID:""
+      ReqID:"",
+      openPO: false
     };
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
-   
+   this.GeneratePO=this.GeneratePO.bind(this)
+   this.completeApproval=this.completeApproval.bind(this)
 
     this.handleInputChange=this.handleInputChange.bind(this)
   }
@@ -117,8 +120,10 @@ class RequisitionsApproval extends Component {
   closeModal() {
     this.setState({ open: false });
   }
-
-
+  closePOModal() {
+    this.setState({ openPO: false });
+  }
+  
   
 
  
@@ -181,6 +186,7 @@ class RequisitionsApproval extends Component {
             if (data.success) {
               this.ProtectRoute();
               this.fetchRequisitionsApproval();
+              this.fetchCompanies();
             this.fetchSuppliers();
             } else {
               localStorage.clear();
@@ -210,23 +216,50 @@ class RequisitionsApproval extends Component {
   };
 
 
-  handleSelectChange = (UserGroup, actionMeta) => {
-            
-      this.setState({ [actionMeta.name]: UserGroup.value });       
+  handleSelectChange = (UserGroup, actionMeta) => {            
+      this.setState({ [actionMeta.name]: UserGroup.value });      
      
   };
-  completeApproval=()=>{
+  fetchCompanies = () => {
+    fetch("/api/Companies/"+localStorage.getItem("CompanyID"), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": localStorage.getItem("xtoken")
+      }
+    })
+      .then(res => res.json())
+      .then(Companies => {
+        if (Companies.length > 0) {
+          this.setState({ Company: Companies });
+        } else {
+          //swal("", "Companies.message", "error");
+         // swal("", Companies.message, "error");
+        }
+      })
+      .catch(err => {
+        swal("", err.message, "error");
+      });
+  };
+  GeneratePO=()=>{ 
+  let supplier=this.state.Suppliers.filter(
+    option => option.ID === this.state.SupplierID
+  )
     let ComapnyID = localStorage.getItem("CompanyID");
     let BranchID = localStorage.getItem("BranchID");  
-    if(this.state.SupplierID){
+ let Today=new Date();
     const data = {
+      Items:this.state.Items,
+      supplier:supplier,
+      Today:Today,
       BranchID: BranchID,
       ComapnyID: ComapnyID,   
       RequisitionID: this.state.ReqID,
-      SupplierID: this.state.SupplierID     
+      SupplierID: this.state.SupplierID   ,
+      Company:this.state.Company  
     }
    
-    fetch("/api/RequisitionsApproval/ID/Complete", {
+    fetch("/api/PO", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -239,8 +272,8 @@ class RequisitionsApproval extends Component {
           if (data.success) {
            
             swal("", "Item has been Ordered!", "success");
-            this.setState({ open: false });
-           this.fetchRequisitionsApproval();
+            this.setState({ FilePath:"http://127.0.0.1:3001/"+ this.state.ReqID+".pdf",openPO: true,open:false });
+            
           } else {
             
               swal("", data.message, "error");
@@ -251,9 +284,49 @@ class RequisitionsApproval extends Component {
       .catch(err => {
         swal("", err.message, "error");
       });
-    }else{
-      swal("", "Select supplier to continue", "error");
-    }
+  
+  };
+  completeApproval=()=>{
+    this.GeneratePO();
+    // let ComapnyID = localStorage.getItem("CompanyID");
+    // let BranchID = localStorage.getItem("BranchID");  
+    // if(this.state.SupplierID){
+    // const data = {
+    //   BranchID: BranchID,
+    //   ComapnyID: ComapnyID,   
+    //   RequisitionID: this.state.ReqID,
+    //   SupplierID: this.state.SupplierID     
+    // }
+   
+    // fetch("/api/RequisitionsApproval/ID/Complete", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     "x-access-token": localStorage.getItem("xtoken")
+    //   },
+    //   body: JSON.stringify(data)
+    // })
+    //   .then(response =>
+    //     response.json().then(data => {
+    //       if (data.success) {
+           
+    //        // swal("", "Item has been Ordered!", "success");
+    //         this.GeneratePO();
+    //         //this.setState({ open: false });
+    //        this.fetchRequisitionsApproval();
+    //       } else {
+            
+    //           swal("", data.message, "error");
+          
+    //       }
+    //     })
+    //   )
+    //   .catch(err => {
+    //     swal("", err.message, "error");
+    //   });
+    // }else{
+    //   swal("", "Select supplier to continue", "error");
+    // }
   };
   postData(url = ``, data = {}) {
     fetch(url, {
@@ -415,10 +488,8 @@ class RequisitionsApproval extends Component {
               <div className="col-sm-8">
                 <b>RequisitionsApproval</b>
               </div>
-              <div className="col-sm-4">
-                 
-                <span className="float-right">
-                
+              <div className="col-sm-4">                 
+                <span className="float-right">                
                 </span>
               </div>
             </div>
@@ -490,7 +561,7 @@ class RequisitionsApproval extends Component {
                         <tr id={i}>
          
             <td >{k.ItemName}</td>
-            <td >{"Spehere("+k.Spehere+") Cylinder("+k.Cylinder+")Axis ("+k.Axis+") Add("+k._Add+")"}</td>
+            <td >{"Spehere("+k.Spehere_R+") Cylinder("+k.Cylinder_R+")Axis ("+k.Axis_R+") Add("+k._Add_R+")"}</td>
             <td>
                             <input
                                type="number"
@@ -554,7 +625,28 @@ class RequisitionsApproval extends Component {
 </div>
  </div>
           </Modal>
-         
+          <Modal
+            visible={this.state.openPO}
+            width="85%"
+            height="500px"
+            effect="fadeInUp"
+          >
+            <div style={{ "overflow-y": "scroll", height: "500px" }}>
+              <a className="close" onClick={() => this.closePOModal()}>
+                &times;
+              </a>
+              <h3 className="text-green" style={{"text-align": "center"}}>PURCHASE ORDER</h3>
+              <hr/>
+              <object
+                  width="100%"
+                  height="450"
+                  data={this.state.FilePath}
+                  type="application/pdf"
+                >
+                  {" "}
+                </object>
+ </div>
+          </Modal>
         </div>
 
         <TableWrapper>

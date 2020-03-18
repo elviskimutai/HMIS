@@ -281,7 +281,7 @@ const SystemAdmin = props => {
   }
 };
 const Patientmanagement = props => {
-  if (props.validaterole("System Administration", "View")) {
+  if (props.validaterole("Patient Management", "View")) {
     return (
       <li>
         <li
@@ -294,15 +294,22 @@ const Patientmanagement = props => {
         </li>
         {props.showmenuvalue ? (
           <ul className="nav nav-second-level">
-            {props.validaterole("Patient Management", "View") ? (
+            {props.validaterole("Patient", "View") ? (
               <li>
                 <Link to="/Patient">
                   <i className="fa fa-user-plus " />
-                  Patients
+                  Registrations
                 </Link>
               </li>
             ) : null}
-        
+          {props.validaterole("Patient Attendance", "View") ? (
+              <li>
+                <Link to="/PatientAttendance">
+                  <i className="fa fa-user-plus " />
+                  Patient Attendance
+                </Link>
+              </li>
+            ) : null}
           </ul>
         ) : null}
       </li>
@@ -325,7 +332,25 @@ const SetUpsmanagement = props => {
         </li>
         {props.showmenuvalue ? (
           <ul className="nav nav-second-level">
-            {props.validaterole("Fees", "View") ? (
+            
+            {props.validaterole("Departments", "View") ? (
+              <li>
+                <Link to="/Departments">
+                  <i className="fa fa-user-plus " />
+                  Departments
+                </Link>
+              </li>
+            ) : null}
+             {props.validaterole("Department Access", "View") ? (
+              <li>
+                <Link to="/Departmentaccess">
+                  <i className="fa fa-user-plus " />
+                  Department Access
+                </Link>
+              </li>
+            ) : null}
+            
+              {props.validaterole("Fees", "View") ? (
               <li>
                 <Link to="/Fees">
                   <i className="fa fa-user-plus " />
@@ -341,6 +366,15 @@ const SetUpsmanagement = props => {
                 </Link>
               </li>
             ) : null}
+            {props.validaterole("Patient Actions", "View") ? (
+              <li>
+                <Link to="/Patientactions">
+                  <i className="fa fa-user-plus " />
+                  Patient Actions
+                </Link>
+              </li>
+            ) : null}
+            
             {props.validaterole("Item categories", "View") ? (
               <li>
                 <Link to="/ItemCategories">

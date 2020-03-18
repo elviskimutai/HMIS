@@ -1,12 +1,12 @@
 var express = require("express");
-var Patient = express();
+var Departments = express();
 var mysql = require("mysql");
-var config = require(".././SystemAdmin/DB");
+var config = require("../SystemAdmin/DB");
 var con = mysql.createPool(config);
 const Joi = require("@hapi/joi");
 
-var auth = require(".././SystemAdmin/auth");
-Patient.get("/:CompanyID", auth.validateRole("Patient Management"), function(
+var auth = require("../SystemAdmin/auth");
+Departments.get("/:CompanyID/:BranchID", auth.validateRole("Departments"), function(
   req,
   res
 ) {
@@ -18,8 +18,8 @@ Patient.get("/:CompanyID", auth.validateRole("Patient Management"), function(
       });
     } // not connected!
     else {
-      let sp = "call SPGetPatients(?)";
-      connection.query(sp, [req.params.CompanyID], function(
+      let sp = "call SPGetAllDepartments(?,?)";
+      connection.query(sp, [req.params.CompanyID,req.params.BranchID], function(
         error,
         results,
         fields
@@ -38,12 +38,12 @@ Patient.get("/:CompanyID", auth.validateRole("Patient Management"), function(
     }
   });
 });
-Patient.get("/:ID/:CompanyID", auth.validateRole("Patient Management"), function(
+Departments.get("/:CompanyID/:BranchID/:DepartmentalLogins", auth.validateRole("Departments"), function(
   req,
   res
 ) {
-  const ID = req.params.ID;
   const CompanyID = req.params.CompanyID;
+  const BranchID = req.params.BranchID;
   con.getConnection(function(err, connection) {
     if (err) {
       res.json({
@@ -52,8 +52,8 @@ Patient.get("/:ID/:CompanyID", auth.validateRole("Patient Management"), function
       });
     } // not connected!
     else {
-      let sp = "call SpGetOnePatient(?,?)";
-      connection.query(sp, [ID,CompanyID], function(error, results, fields) {
+      let sp = "call SPGetDepartmentalLogins(?,?)";
+      connection.query(sp, [CompanyID,BranchID], function(error, results, fields) {
         if (error) {
           res.json({
             success: false,
@@ -69,40 +69,13 @@ Patient.get("/:ID/:CompanyID", auth.validateRole("Patient Management"), function
   });
 });
 
-Patient.post("/", auth.validateRole("Patient Registration"), function(req, res) {
+Departments.post("/", auth.validateRole("Departments"), function(req, res) {
   const schema = Joi.object({
     ComapnyID: Joi.number().integer(),
     BranchID: Joi.number().integer(),
-    MobileNo: Joi.string()
-      .min(10)
-      .required(),
-    Address: Joi.string()
-      .required(),  
-    Email: Joi.string().email({ minDomainSegments: 2 }),
-     DOB: Joi.date().required(),
-    Gender: Joi.string().required(), 
-    Names: Joi.string().required(),
-    Race: Joi.string()
-    .allow(null)
-    .allow(""),
-    NextOfKin: Joi.string()
-    .allow(null)
-    .allow(""),
-    NextOfkinRelationship: Joi.string()
-    .allow(null)
-    .allow(""),
-    EmergencyContact: Joi.string()
-    .allow(null)
-    .allow(""),
-    Ocupation: Joi.string()
-    .allow(null)
-    .allow(""),
-    ResidentialAddress: Joi.string()
-    .allow(null)
-    .allow(""),
-    RefferedBy: Joi.string()
-    .allow(null)
-    .allow("")
+   
+      Description: Joi.string()
+      .required()
   });
   //   const result = Joi.validate(, schema);
   //   if (!result.error) {
@@ -112,22 +85,11 @@ Patient.post("/", auth.validateRole("Patient Registration"), function(req, res) 
     if (!error) {  
 
         let data = [
-            req.body.Names,
-            req.body.MobileNo,
-            req.body.Email,
-            req.body.Address,
-            req.body.DOB,
+            req.body.Description,
+           
             res.locals.user,           
             req.body.ComapnyID,  
-            req.body.BranchID,
-            req.body.Gender,
-            req.body.Race,
-            req.body.NextOfKin,
-            req.body.NextOfkinRelationship,
-            req.body.EmergencyContact,
-            req.body.Ocupation,
-            req.body.ResidentialAddress,
-            req.body.RefferedBy            
+            req.body.BranchID         
           
         ];
         con.getConnection(function(err, connection) {
@@ -138,7 +100,7 @@ Patient.post("/", auth.validateRole("Patient Registration"), function(req, res) 
             });
           } // not connected!
           else {
-            let sp = "call SPSavepatient(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            let sp = "call SPSaveDepartment(?,?,?,?)";
             connection.query(sp, data, function(error, results, fields) {
               if (error) {
                 res.json({
@@ -171,40 +133,13 @@ Patient.post("/", auth.validateRole("Patient Registration"), function(req, res) 
     });
   }
 });
-Patient.put("/:ID", auth.validateRole("Patient Registration"), function(req, res) {
+Departments.put("/:ID", auth.validateRole("Departments"), function(req, res) {
     const schema = Joi.object({
         ComapnyID: Joi.number().integer(),
         BranchID: Joi.number().integer(),
-        MobileNo: Joi.string()
-          .min(10)
-          .required(),
-        Address: Joi.string()
-          .required(),  
-        Email: Joi.string().email({ minDomainSegments: 2 }),
-         DOB: Joi.date().required(),
-        Gender: Joi.string().required(), 
-        Names: Joi.string().required(),
-        Race: Joi.string()
-        .allow(null)
-        .allow(""),
-        NextOfKin: Joi.string()
-        .allow(null)
-        .allow(""),
-        NextOfkinRelationship: Joi.string()
-        .allow(null)
-        .allow(""),
-        EmergencyContact: Joi.string()
-        .allow(null)
-        .allow(""),
-        Ocupation: Joi.string()
-        .allow(null)
-        .allow(""),
-        ResidentialAddress: Joi.string()
-        .allow(null)
-        .allow(""),
-        RefferedBy: Joi.string()
-        .allow(null)
-        .allow("")
+       
+          Description: Joi.string()
+          .required()
       });
   try {
     const { error, value } = schema.validate(req.body);
@@ -213,24 +148,11 @@ Patient.put("/:ID", auth.validateRole("Patient Registration"), function(req, res
       const ID = req.params.ID;
       let data = [
         ID,
-        req.body.Names,
-            req.body.MobileNo,
-            req.body.Email,
-            req.body.Address,
-            req.body.DOB,
+        req.body.Description,
             res.locals.user,           
             req.body.ComapnyID,  
-            req.body.BranchID,
-            req.body.Gender,
-            req.body.Race,
-            req.body.NextOfKin,
-            req.body.NextOfkinRelationship,
-            req.body.EmergencyContact,
-            req.body.Ocupation,
-            req.body.ResidentialAddress,
-            req.body.RefferedBy  
+            req.body.BranchID
       ];
-     
       con.getConnection(function(err, connection) {
         if (err) {
           res.json({
@@ -239,7 +161,7 @@ Patient.put("/:ID", auth.validateRole("Patient Registration"), function(req, res
           });
         } // not connected!
         else {
-          let sp = "call SPUpdatePatient(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+          let sp = "call SPUpdateDepartment(?,?,?,?,?)";
           connection.query(sp, data, function(error, results, fields) {
             if (error) {
               res.json({
@@ -271,9 +193,9 @@ Patient.put("/:ID", auth.validateRole("Patient Registration"), function(req, res
     });
   }
 });
-Patient.delete(
+Departments.delete(
   "/:ID/:ComapnyID/:BranchID",
-  auth.validateRole("Patient Management"),
+  auth.validateRole("Departments"),
   function(req, res) {
     const ID = req.params.ID;
     let data = [ID, res.locals.user, req.params.ComapnyID, req.params.BranchID];
@@ -285,7 +207,7 @@ Patient.delete(
         });
       } // not connected!
       else {
-        let sp = "call SPDeletePatient(?,?,?,?)";
+        let sp = "call SPDeleteDepartment(?,?,?,?)";
         connection.query(sp, data, function(error, results, fields) {
           if (error) {
             res.json({
@@ -305,4 +227,4 @@ Patient.delete(
     });
   }
 );
-module.exports = Patient;
+module.exports = Departments;

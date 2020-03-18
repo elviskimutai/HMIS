@@ -7,7 +7,7 @@ const bcrypt = require("bcryptjs");
 const Joi = require("@hapi/joi");
 
 var auth = require("./auth");
-SystemUsers.get("/:CompanyID", auth.validateRole("System Users"), function(
+SystemUsers.get("/:CompanyID",  function(
   req,
   res
 ) {
@@ -283,4 +283,87 @@ SystemUsers.delete(
     });
   }
 );
+
+SystemUsers.post("/:RegisterLogin",  function(req, res) {
+  try {
+      let data = [      
+        req.body.user,
+        req.body.BranchID
+      ];
+      con.getConnection(function(err, connection) {
+        if (err) {
+          res.json({
+            success: false,
+            message: err.message
+          });
+        } // not connected!
+        else {
+          let sp = "call SPRegisterLogin(?,?)";
+          connection.query(sp, data, function(error, results, fields) {
+            if (error) {
+              res.json({
+                success: false,
+                message: error.message
+              });
+            } else {
+              res.json({
+                success: true,
+                message: "saved"
+              });
+            }
+            connection.release();
+            // Don't use the connection here, it has been returned to the pool.
+          });
+        }
+      });
+  
+  } catch (err) {
+    //console.log(err);
+    res.json({
+      success: false,
+      message: err
+    });
+  }
+});
+SystemUsers.post("/:RegisterLogin/:Logout",  function(req, res) {
+  try {
+      let data = [  
+        req.body.UserName,
+        req.body.BranchID
+      ];
+      con.getConnection(function(err, connection) {
+        if (err) {
+          res.json({
+            success: false,
+            message: err.message
+          });
+        } // not connected!
+        else {
+          let sp = "call SPLogoutDepartmentalLogins(?,?)";
+          connection.query(sp, data, function(error, results, fields) {
+            if (error) {
+              res.json({
+                success: false,
+                message: error.message
+              });
+            } else {
+              res.json({
+                success: true,
+                message: "saved"
+              });
+            }
+            connection.release();
+            // Don't use the connection here, it has been returned to the pool.
+          });
+        }
+      });
+  
+  } catch (err) {
+    //console.log(err);
+    res.json({
+      success: false,
+      message: err
+    });
+  }
+});
 module.exports = SystemUsers;

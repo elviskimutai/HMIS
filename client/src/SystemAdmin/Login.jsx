@@ -10,12 +10,32 @@ class Login extends Component {
       password: "",
       Branches: [],
       BranchID: "",
+      xtoken:"",
       ShowBranches: false,
       redirect: false
     };
   }
+  RegisterLogin( data = {}) {
+    fetch("/api/users/RegisterLogin", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": this.state.xtoken
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response =>
+        response.json().then(data => {
+        })
+      )
+      .catch(err => {
+       // swal("", err.message, "error");
+      });
+  }
+ 
   handleSelectChange = (UserGroup, actionMeta) => {
     localStorage.setItem("BranchID", UserGroup.value);
+    this.RegisterLogin({BranchID:UserGroup.value,user:this.state.username});
     this.setState({
       redirect: true
     });
@@ -73,6 +93,7 @@ class Login extends Component {
             localStorage.setItem("UserPhoto", data.userdata.Photo);
             localStorage.setItem("CompanyID", data.userdata.CompanyID);
             localStorage.setItem("xtoken", data.token);
+            this.setState({ xtoken: data.token ,});
             this.fetchBranches(data.userdata.UserName, data.token);
           } else {
             let Msgg = data.message;

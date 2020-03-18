@@ -17,10 +17,14 @@ class Requisitions extends Component {
       Item:"",
       Description: "",
       Quantity: "",
-      Sphere:null,
-      Cylinder:null,
-      Axis:null,
-      Add:null,
+      Spehere_R:null,
+      Cylinder_R:null,
+      Axis_R:null,
+      _Add_R:null,
+      Spehere_L:null,
+      Cylinder_L:null,
+      Axis_L:null,
+      _Add_L:null,
       ID:"",    
       msg:"",
       open: false,   
@@ -158,8 +162,9 @@ CheckValue=(Value,desc)=>{
     const target = event.target;
     const value = target.type === "checkbox" ? target.checked : target.value;
     const name = target.name;
-    if(name==="Add" || name==="Sphere" || name==="Cylinder"  ){
+    if(name==="_Add_R" || name==="Spehere_R" || name==="Cylinder_R" || name==="_Add_L" || name==="Spehere_L" || name==="Cylinder_L"  ){
       this.CheckValue(value,name);
+      this.setState({ [name]: value });
     }else{
       this.setState({ [name]: value });
     }
@@ -249,10 +254,15 @@ CheckValue=(Value,desc)=>{
       Description: this.state.Description,
       Quantity: this.state.Quantity,     
       ItemID:this.state.Item,
-      Sphere:this.state.Sphere,
-      Cylinder:this.state.Cylinder,
-      Axis:this.state.Axis,
-      Add:this.state.Add
+      Spehere_R:this.state.Spehere_R,
+      Cylinder_R:this.state.Cylinder_R,
+      Axis_R:this.state.Axis_R,
+      _Add_R:this.state._Add_R,
+
+      Spehere_L:this.state.Spehere_L,
+      Cylinder_L:this.state.Cylinder_L,
+      Axis_L:this.state.Axis_L,
+      _Add_L:this.state._Add_L
     };
     if(this.state.msg.includes("Invalid ")){
       swal("", "Invalid RX Values!", "error");
@@ -431,7 +441,7 @@ CheckValue=(Value,desc)=>{
           ItemName: k.ItemName,
           Description: k.Description,
           Quantity: k.Quantity,
-          RX:"Spehere("+k.Spehere+") Cylinder("+k.Cylinder+")Axis ("+k.Axis+") Add("+k._Add+")",
+          RX:"Spehere("+k.Spehere_R+") Cylinder_R("+k.Cylinder_R+")Axis_R ("+k.Axis_R+") Add("+k._Add_R+")",
           Price: k.Price,
           Active: k.Active,
           Taxrate: k.Taxrate,
@@ -505,10 +515,10 @@ CheckValue=(Value,desc)=>{
           <Modal
             visible={this.state.open}
             width="60%"
-            height="400px"
+            height="500px"
             effect="fadeInUp"
           >
-            <div style={{ "overflow-y": "scroll", height: "400px" }}>
+            <div style={{ "overflow-y": "scroll", height: "500px" }}>
               <a className="close" onClick={() => this.closeModal()}>
                 &times;
               </a>
@@ -553,6 +563,7 @@ CheckValue=(Value,desc)=>{
                   
                       </div>
                       {this.state.showrx ?
+                      <div>
                       <div className=" row">
                         <div className="col-sm">
                         <div className=" row">
@@ -562,17 +573,17 @@ CheckValue=(Value,desc)=>{
                               htmlFor="Datereceived"
                               className="fontWeight-bold"
                             >
-                              Sphere
+                              Spehere_R
                             </label>
                             <input
                               type="number"
                               step="0.01" min="-10" max="10"
                               className="form-control"
-                              name="Sphere"
-                              id="Sphere"
+                              name="Spehere_R"
+                              id="Spehere_R"
                               required
                               onChange={this.handleInputChange}
-                              value={this.state.Sphere}
+                              value={this.state.Spehere_R}
                             />
                            
                           </div>
@@ -580,20 +591,20 @@ CheckValue=(Value,desc)=>{
                           <div className=" col-sm">
                             <div className="form-group">
                             <label
-                              htmlFor="Cylinder"
+                              htmlFor="Cylinder_R"
                               className="fontWeight-bold"
                             >
-                              Cylinder
+                              Cylinder_R
                             </label>
                             <input
                               type="number"
                               step="0.01" min="-10" max="10"
                               className="form-control"
-                              name="Cylinder"
-                              id="Cylinder"
+                              name="Cylinder_R"
+                              id="Cylinder_R"
                               required
                               onChange={this.handleInputChange}
-                              value={this.state.Cylinder}
+                              value={this.state.Cylinder_R}
                             />
                           </div>
                         </div>
@@ -607,17 +618,17 @@ CheckValue=(Value,desc)=>{
                               htmlFor="Datereceived"
                               className="fontWeight-bold"
                             >
-                              Axis
+                              Axis_R
                             </label>
                             <input
                                type="number"
                                max="180"
                               className="form-control"
-                              name="Axis"
-                              id="Axis"
+                              name="Axis_R"
+                              id="Axis_R"
                               required
                               onChange={this.handleInputChange}
-                              value={this.state.Axis}
+                              value={this.state.Axis_R}
                             />
                           </div>
                           </div> 
@@ -627,17 +638,18 @@ CheckValue=(Value,desc)=>{
                               htmlFor="Datereceived"
                               className="fontWeight-bold"
                             >
-                              Add
+                              Add_R
+                            
                             </label>
                             <input
                                type="number"
                                step="0.01" min="-10" max="10"
                               className="form-control"
-                              name="Add"
-                              id="Add"
+                              name="_Add_R"
+                              id="_Add_R"
                               required
                               onChange={this.handleInputChange}
-                              value={this.state.Add}
+                              value={this.state._Add_R}
                             />
                             
                           </div>
@@ -645,7 +657,103 @@ CheckValue=(Value,desc)=>{
                         </div>
                         
                         </div>
-                      </div>:null}
+                      </div>
+                      <div className=" row">
+                        <div className="col-sm">
+                        <div className=" row">
+                        <div className=" col-sm">
+                          <div className="form-group">
+                            <label
+                              htmlFor="Datereceived"
+                              className="fontWeight-bold"
+                            >
+                              Spehere_L
+                            </label>
+                            <input
+                              type="number"
+                              step="0.01" min="-10" max="10"
+                              className="form-control"
+                              name="Spehere_L"
+                              id="Spehere_L"
+                              required
+                              onChange={this.handleInputChange}
+                              value={this.state.Spehere_L}
+                            />
+                           
+                          </div>
+                          </div> 
+                          <div className=" col-sm">
+                            <div className="form-group">
+                            <label
+                              htmlFor="Cylinder_R"
+                              className="fontWeight-bold"
+                            >
+                              Cylinder_L
+                            </label>
+                            <input
+                              type="number"
+                              step="0.01" min="-10" max="10"
+                              className="form-control"
+                              name="Cylinder_L"
+                              id="Cylinder_L"
+                              required
+                              onChange={this.handleInputChange}
+                              value={this.state.Cylinder_L}
+                            />
+                          </div>
+                        </div>
+                        </div>
+                        </div>
+                        <div className="col-sm">
+                        <div className=" row">
+                        <div className=" col-sm">
+                          <div className="form-group">
+                            <label
+                              htmlFor="Datereceived"
+                              className="fontWeight-bold"
+                            >
+                              Axis_L
+                            </label>
+                            <input
+                               type="number"
+                               max="180"
+                              className="form-control"
+                              name="Axis_L"
+                              id="Axis_L"
+                              required
+                              onChange={this.handleInputChange}
+                              value={this.state.Axis_L}
+                            />
+                          </div>
+                          </div> 
+                          <div className=" col-sm">
+                            <div className="form-group">
+                            <label
+                              htmlFor="Datereceived"
+                              className="fontWeight-bold"
+                            >
+                              Add_L
+                            
+                            </label>
+                            <input
+                               type="number"
+                               step="0.01" min="-10" max="10"
+                              className="form-control"
+                              name="_Add_L"
+                              id="_Add_L"
+                              required
+                              onChange={this.handleInputChange}
+                              value={this.state._Add_L}
+                            />
+                            
+                          </div>
+                        </div>
+                        </div>
+                        
+                        </div>
+                      </div>
+                      </div>
+                      :null}
                       <div className=" row">
                         
                         <div className=" col-sm">
@@ -671,7 +779,7 @@ CheckValue=(Value,desc)=>{
                           <div className=" col-sm">
                             <div className="form-group">
                             <label
-                              htmlFor="Cylinder"
+                              htmlFor="Cylinder_R"
                               className="fontWeight-bold"
                             >
                               Description

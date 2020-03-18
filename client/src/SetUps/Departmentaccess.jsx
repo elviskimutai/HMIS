@@ -1,18 +1,22 @@
 import React, { Component } from "react";
 import swal from "sweetalert";
-import Table from "./Table";
-import TableWrapper from "./TableWrapper";
+import Table from "./../SystemAdmin/Table";
+import TableWrapper from "./../SystemAdmin/TableWrapper";
 import Modal from "react-awesome-modal";
+import Select from "react-select";
 var _ = require("lodash");
-class Branches extends Component {
+class Departmentaccess extends Component {
   constructor() {
     super();
     this.state = {
+      Departmentaccess: [],
+      Departments:[],
+      Users: [],
       Branches: [],
       privilages: [],
-      Name: "",
+      UserName: "",
       Description: "",
-      BranchID: "",
+      DepartmentID: "",
       open: false,
       isUpdate: false
     };
@@ -21,7 +25,47 @@ class Branches extends Component {
     this.closeModal = this.closeModal.bind(this);
     this.Resetsate = this.Resetsate.bind(this);
   }
-
+  fetchBranches = () => {
+    fetch("/api/Branches/" + localStorage.getItem("CompanyID"), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": localStorage.getItem("xtoken")
+      }
+    })
+      .then(res => res.json())
+      .then(Branches => {
+        if (Branches.length > 0) {
+          this.setState({ Branches: Branches });
+        } else {
+          //swal("", "Branches.message", "error");
+          swal("", Branches.message, "error");
+        }
+      })
+      .catch(err => {
+        swal("", err.message, "error");
+      });
+  };
+  fetchUsers = () => {
+    fetch("/api/users/" + localStorage.getItem("CompanyID"), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": localStorage.getItem("xtoken")
+      }
+    })
+      .then(res => res.json())
+      .then(Users => {
+        if (Users.length > 0) {
+          this.setState({ Users: Users });
+        } else {
+          swal("", Users.message, "error");
+        }
+      })
+      .catch(err => {
+        swal("", err.message, "error");
+      });
+  };
   ProtectRoute() {
     fetch("/api/UserAccess", {
       method: "GET",
@@ -97,14 +141,14 @@ class Branches extends Component {
     const data = {
       Name: "",
 
-      BranchID: "",
+      DepartmentID: "",
       isUpdate: false
     };
     this.setState(data);
   }
 
-  fetchBranches = () => {
-    fetch("/api/Branches/" + localStorage.getItem("CompanyID"), {
+  fetchDepartmentaccess = () => {
+    fetch("/api/Departmentaccess/" + localStorage.getItem("CompanyID"), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -112,12 +156,32 @@ class Branches extends Component {
       }
     })
       .then(res => res.json())
-      .then(Branches => {
-        if (Branches.length > 0) {
-          this.setState({ Branches: Branches });
+      .then(Departmentaccess => {
+        if (Departmentaccess.length > 0) {
+          this.setState({ Departmentaccess: Departmentaccess });
         } else {
-          //swal("", "Branches.message", "error");
-          swal("", Branches.message, "error");
+          //swal("", "Departmentaccess.message", "error");
+          swal("", Departmentaccess.message, "error");
+        }
+      })
+      .catch(err => {
+        swal("", err.message, "error");
+      });
+  };
+  fetchDepartments = () => {
+    fetch("/api/Departments/" + localStorage.getItem("CompanyID")+"/"+localStorage.getItem("BranchID"), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": localStorage.getItem("xtoken")
+      }
+    })
+      .then(res => res.json())
+      .then(Departments => {
+        if (Departments.length > 0) {
+          this.setState({ Departments: Departments });
+        } else {
+          swal("", Departments.message, "error");
         }
       })
       .catch(err => {
@@ -140,8 +204,11 @@ class Branches extends Component {
         .then(response =>
           response.json().then(data => {
             if (data.success) {
-              this.fetchBranches();
               this.ProtectRoute();
+              this.fetchDepartmentaccess();
+              this.fetchUsers();
+              this.fetchBranches();
+              this.fetchDepartments();
             } else {
               localStorage.clear();
               return (window.location = "/#/Logout");
@@ -157,23 +224,21 @@ class Branches extends Component {
   handleSubmit = event => {
     event.preventDefault();
     let CompanyID = localStorage.getItem("CompanyID");
+    let BranchID=localStorage.getItem("BranchID");
     const data = {
       CompanyID: CompanyID,
-      Name: this.state.Name
+      DepartmentID: this.state.DepartmentID,
+      UserName: this.state.UserName,
+      BranchID:BranchID
     };
 
-    if (this.state.isUpdate) {
-      this.UpdateData("/api/Branches/" + this.state.BranchID, data);
-    } else {
-      this.postData("/api/Branches", data);
-    }
+    this.postData("/api/Departmentaccess", data);
   };
   handleEdit = Name => {
     const data = {
-      Name: Name.Name,
-      open: true,
-      isUpdate: true,
-      BranchID: Name.BranchID
+      UserName: Name.UserName,
+      DepartmentID: Name.DepartmentID,
+      open: true
     };
 
     this.setState(data);
@@ -188,7 +253,12 @@ class Branches extends Component {
     }).then(willDelete => {
       if (willDelete) {
         return fetch(
-          "/api/Branches/" + k + "/" + localStorage.getItem("CompanyID"),
+          "/api/Departmentaccess/" +
+            k.DepartmentID +
+            "/" +
+            localStorage.getItem("CompanyID") +
+            "/" +
+            k.UserName,
           {
             method: "Delete",
             headers: {
@@ -205,7 +275,7 @@ class Branches extends Component {
               } else {
                 swal("", data.message, "error");
               }
-              this.fetchBranches();
+              this.fetchDepartmentaccess();
             })
           )
           .catch(err => {
@@ -226,7 +296,7 @@ class Branches extends Component {
     })
       .then(response =>
         response.json().then(data => {
-          this.fetchBranches();
+          this.fetchDepartmentaccess();
 
           if (data.success) {
             swal("", "Record has been updated!", "success");
@@ -241,6 +311,9 @@ class Branches extends Component {
         swal("", err.message, "error");
       });
   }
+  handleSelectChange = (UserGroup, actionMeta) => {
+    this.setState({ [actionMeta.name]: UserGroup.value });
+  };
   postData(url = ``, data = {}) {
     fetch(url, {
       method: "POST",
@@ -252,7 +325,7 @@ class Branches extends Component {
     })
       .then(response =>
         response.json().then(data => {
-          this.fetchBranches();
+          this.fetchDepartmentaccess();
 
           if (data.success) {
             swal("", "Record has been saved!", "success");
@@ -269,10 +342,15 @@ class Branches extends Component {
   }
   render() {
     const ColumnData = [
-     
       {
-        label: "Name",
-        field: "Name",
+        label: "DepartmentName",
+        field: "DepartmentName",
+        sort: "asc",
+        width: 200
+      },
+      {
+        label: "UserName",
+        field: "UserName",
         sort: "asc",
         width: 200
       },
@@ -285,33 +363,21 @@ class Branches extends Component {
     ];
     let Rowdata1 = [];
 
-    const rows = [...this.state.Branches];
+    const rows = [...this.state.Departmentaccess];
 
     if (rows.length > 0) {
       rows.forEach(k => {
         const Rowdata = {
-         
-          Name: k.Name,
+          DepartmentName: k.DepartmentName,
+          UserName: k.UserName,
 
           action: (
             <span>
-              {this.validaterole("Branches", "Edit") ? (
-                <a
-                  className="fa fa-edit"
-                  style={{ color: "#007bff" }}
-                  onClick={e => this.handleEdit(k, e)}
-                >
-                  Edit |
-                </a>
-              ) : (
-                <i>-</i>
-              )}
               &nbsp;
-              {this.validaterole("Branches", "Remove") ? (
+              {this.validaterole("Department Access", "Remove") ? (
                 <a
-                  className="fa fa-trash"
                   style={{ color: "#f44542" }}
-                  onClick={e => this.handleDelete(k.BranchID, e)}
+                  onClick={e => this.handleDelete(k, e)}
                 >
                   Delete
                 </a>
@@ -325,10 +391,18 @@ class Branches extends Component {
       });
     }
 
-    let tablestyle = {
-      width: "60%"
-    };
-
+    const UsersOptions = [...this.state.Users].map((k, i) => {
+      return {
+        value: k.UserName,
+        label: k.FullNames
+      };
+    });
+    const DepartmentsonsOptions = [...this.state.Departments].map((k, i) => {
+        return {
+          value: k.ID,
+          label: k.Name
+        };
+      });
     return (
       <div>
         <div>
@@ -337,11 +411,11 @@ class Branches extends Component {
               <br />
               <div className="row">
                 <div className="col-sm-9">
-                  <h2>Branches</h2>
+                  <h2>Department Access</h2>
                 </div>
                 <div className="col-sm-3">
                   <span className="float-right">
-                    {this.validaterole("Branches", "AddNew") ? (
+                    {this.validaterole("Department Access", "AddNew") ? (
                       <button
                         type="button"
                         onClick={this.openModal}
@@ -351,7 +425,7 @@ class Branches extends Component {
                       </button>
                     ) : null}
                     &nbsp;
-                    {this.validaterole("Branches", "Export") ? (
+                    {this.validaterole("Department Access", "Export") ? (
                       <button
                         onClick={this.exportpdf}
                         type="button"
@@ -378,7 +452,7 @@ class Branches extends Component {
                 <div className="row">
                   <div className="col-sm-5"></div>
                   <div className="col-sm-4 font-weight-bold">
-                  Branches
+                    Security Groups{" "}
                   </div>
                 </div>
 
@@ -394,17 +468,37 @@ class Branches extends Component {
                                   htmlFor="exampleInputEmail1"
                                   className="font-weight-bold"
                                 >
-                                  Name
+                                  UserName
                                 </label>
-                                <input
-                                  type="text"
-                                  name="Name"
+                                <Select
+                                  name="UserName"
+                                  value={UsersOptions.filter(
+                                    option =>
+                                      option.value === this.state.UserName
+                                  )}
+                                  onChange={this.handleSelectChange}
+                                  options={UsersOptions}
                                   required
-                                  onChange={this.handleInputChange}
-                                  value={this.state.Name}
-                                  className="form-control"
-                                  id="exampleInputPassword1"
-                                  placeholder="Name"
+                                />
+                              </div>
+                            </div>
+                            <div className="col-sm">
+                              <div className="form-group">
+                                <label
+                                  htmlFor="exampleInputEmail1"
+                                  className="font-weight-bold"
+                                >
+                                  Branch
+                                </label>
+                                <Select
+                                  name="DepartmentID"
+                                  value={DepartmentsonsOptions.filter(
+                                    option =>
+                                      option.value === this.state.DepartmentID
+                                  )}
+                                  onChange={this.handleSelectChange}
+                                  options={DepartmentsonsOptions}
+                                  required
                                 />
                               </div>
                             </div>
@@ -442,4 +536,4 @@ class Branches extends Component {
   }
 }
 
-export default Branches;
+export default Departmentaccess;
